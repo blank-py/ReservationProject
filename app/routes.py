@@ -185,7 +185,7 @@ def book():
         meetingcollisions=Meeting.query.filter_by(date=datetime.combine(form.date.data,datetime.min.time())).filter_by(roomId=form.rooms.data).all()
         print(len(meetingcollisions))
         for meetingcollision in meetingcollisions:
-            # [a, b] overlaps with [x, y] iff b > x and a < y
+            # [a, b] overlaps with [x, y] if b > x and a < y
             if (form.startTime.data<meetingcollision.endTime and (form.startTime.data+form.duration.data)>meetingcollision.startTime):
                 flash(f'The time from {meetingcollision.startTime} to {meetingcollision.endTime} is already booked by {User.query.filter_by(id=meetingcollision.bookerId).first().fullname}.')
                 return redirect(url_for('book'))
@@ -195,25 +195,20 @@ def book():
     
         team=Team.query.filter_by(id=current_user.teamId).first()
         room=Room.query.filter_by(id=form.rooms.data).first()
-        cost=room.cost
         endTime=form.startTime.data+form.duration.data
 
         participants_user=form.participants_user.data
-        participants_partner=form.participants_partner.data
 
         meeting=Meeting(title=form.title.data,teamId=team.id,roomId=room.id,bookerId=booker.id,date=form.date.data,startTime=form.startTime.data,endTime=endTime,duration=form.duration.data)
         db.session.add(meeting)
 
         # Add booking log
-        log=CostLog(title=form.title.data,teamId=team.id,teamName=team.teamName,date=form.date.data,cost=cost*form.duration.data)
+        log=BookingLog(title=form.title.data,teamId=team.id,teamName=team.teamName,date=form.date.data)
         db.session.add(log)
 
         # Add participants records
         for participant in participants_user:
             participating=Participants_user(meeting=form.title.data,userId=participant)
-            db.session.add(participating)
-        for participant in participants_partner:
-            participating=Participants_partner(meeting=form.title.data,partnerId=participant)
             db.session.add(participating)
 
         db.session.commit()
@@ -239,12 +234,9 @@ def cancelbooking():
         participants_user=Participants_user.query.filter_by(meeting=meeting.title).all()
         for part in participants_user:
             db.session.delete(part)
-        participants_partner=Participants_partner.query.filter_by(meeting=meeting.title).all()
-        for part in participants_partner:
-            db.session.delete(part)
         
-        costlog=CostLog.query.filter_by(title=meeting.title).first()
-        db.session.delete(costlog)
+        bookinglog=BookingLog.query.filter_by(title=meeting.title).first()
+        db.session.delete(bookinglog)
         
         db.session.delete(meeting)
         db.session.commit()
@@ -291,8 +283,7 @@ def roomoccupation():
                         break
             roomoccus.append(roomoccu)
             
-            allrooms.append({'roomName':room.roomName,'tel':'Yes' if room.telephone else 'No','pro':'Yes' if room.projector else 'No',\
-                             'wb':'Yes' if room.whiteboard else 'No','cost':room.cost})
+            allrooms.append({'roomName':room.roomName})
         return render_template('roomoccupationlist.html',title='Room Occupation',roomoccus=roomoccus,date=form.date.data,hours=[str(hour) for hour in hours],allrooms=allrooms)
     return render_template('roomoccupation.html',title='Room Occupation Status',form=form)
 
@@ -318,29 +309,8 @@ def meetingparticipants():
         meeting=Meeting.query.filter_by(id=form.ids.data).first()
         participants=[]
         participants_user=Participants_user.query.filter_by(meeting=meeting.title).all()
-        participants_partner=Participants_partner.query.filter_by(meeting=meeting.title).all()
         for part in participants_user:
             participants.append(f'{User.query.filter_by(id=part.userId).first().fullname} from {Team.query.filter_by(id=User.query.filter_by(id=part.userId).first().teamId).first().teamName}')
-        for part in participants_partner:
-            participants.append(f'partner {Businesspartner.query.filter_by(id=part.partnerId).first().name} from {Businesspartner.query.filter_by(id=part.partnerId).first().representing}')
         return render_template('meetingparticipants.html',title='Meeting Participants',meetingtitle=meeting.title,participants=participants)
     return render_template('meetingparticipantscheck.html',title='Meeting Participants',form=form)
 
-@app.route('/costs',methods=['GET','POST'])
-def costs():
-    form=CostaccruedForm()
-    if form.validate_on_submit():
-        costlogs=CostLog.query.filter(CostLog.date>=datetime.combine(form.startdate.data,datetime.min.time())).filter(CostLog.date<=datetime.combine(form.enddate.data,datetime.min.time())).all()
-        teams=list(set([costlog.teamName for costlog in costlogs]))
-        teamcosts=[]
-        # slow implementation, can be optimized
-        for team in teams:
-            teamcost=dict()
-            teamcost['teamName']=team
-            teamcost['total']=0
-            for costlog in costlogs:
-                if costlog.teamName==team:
-                    teamcost['total']+=costlog.cost
-            teamcosts.append(teamcost)
-        return render_template('costs.html',title='Cost Accrued',startdate=form.startdate.data,enddate=form.enddate.data,teamcosts=teamcosts)
-    return render_template('costcheck.html',title='Cost Accrued check',form=form)

@@ -1,5 +1,5 @@
-# Author/Emil Mustonen
-#Imports
+# Authors: Emil Mustonen, Jesse Malinen
+# Imports
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, IntegerField, SelectField, DateField, \
     SelectMultipleField, widgets
@@ -8,20 +8,19 @@ from flask_login import current_user
 from app.models import *
 import datetime
 
-
+# Login Form
 class LoginForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
     remember_me = BooleanField('Remember Me')
     submit = SubmitField('Sign In')
 
-
+# Registration Form
 class RegistrationForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
-    password2 = PasswordField('Password', validators=[DataRequired(), EqualTo('password')])
+    password2 = PasswordField('Password', validators=[DataRequired(), EqualTo('password')]) # double check password
     fullname = StringField('Full Name', validators=[DataRequired()])
-    position = StringField('Position', validators=[DataRequired()])
     teamId = IntegerField('Team number', validators=[DataRequired()])
     teamName = StringField('Team name', validators=[DataRequired()])
     submit = SubmitField('Register')
@@ -37,7 +36,7 @@ class RegistrationForm(FlaskForm):
             if team.teamName != self.teamName.data:
                 raise ValidationError('Team name does not match, try again.')
 
-
+# Form for adding a team into db
 class AddteamForm(FlaskForm):
     id = IntegerField('Team number', validators=[DataRequired()])
     teamName = StringField('Team name', validators=[DataRequired()])
@@ -53,12 +52,11 @@ class AddteamForm(FlaskForm):
         if team is not None:
             raise ValidationError('Team Name Exist, try again')
 
-
+# Form for adding a user
 class AdduserForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
     fullname = StringField('Full Name', validators=[DataRequired()])
-    position = StringField('Position', validators=[DataRequired()])
     teamId = IntegerField('Team number', validators=[DataRequired()])
     teamName = StringField('Team name', validators=[DataRequired()])
     submit = SubmitField('Register')
@@ -84,7 +82,7 @@ class TeamChoiceIterable(object):
         for choice in choices:
             yield choice
 
-
+# Form for deleting a team from db
 class DeleteteamForm(FlaskForm):
     ids = SelectField('Choose Team', choices=TeamChoiceIterable(), coerce=int)
     submit = SubmitField('Delete')
@@ -99,16 +97,7 @@ class UserChoiceIterable(object):
         for choice in choices:
             yield choice
 
-
-class PartnerChoiceIterable(object):
-    def __iter__(self):
-        partners = Businesspartner.query.all()
-        choices = [(partner.id, f'{partner.name} from {partner.representing}') for partner in partners]
-        # choices=[choice for choice in choices if choice[1]!='admin'] # do not delete admin
-        for choice in choices:
-            yield choice
-
-
+# Form for deleting a user from db
 class DeleteuserForm(FlaskForm):
     ids = SelectField('Choose User', coerce=int, choices=UserChoiceIterable())
     submit = SubmitField('Delete')
@@ -121,7 +110,7 @@ class RoomChoiceIterable(object):
         for choice in choices:
             yield choice
 
-
+# Form for booking a meeting
 class BookmeetingForm(FlaskForm):
     title = StringField('Meeting title', validators=[DataRequired()])
     rooms = SelectField('Choose room', coerce=int, choices=RoomChoiceIterable())
@@ -133,9 +122,6 @@ class BookmeetingForm(FlaskForm):
     participants_user = SelectMultipleField('Choose participants from company', coerce=int,
                                             choices=UserChoiceIterable(), option_widget=widgets.CheckboxInput(),
                                             widget=widgets.ListWidget(prefix_label=False), validators=[DataRequired()])
-    participants_partner = SelectMultipleField('Choose participants from partners', coerce=int,
-                                               choices=PartnerChoiceIterable(), option_widget=widgets.CheckboxInput(),
-                                               widget=widgets.ListWidget(prefix_label=False))
     submit = SubmitField('Book')
 
     def validate_title(self, title):
@@ -157,7 +143,7 @@ class MeetingChoiceIterable(object):
         for choice in choices:
             yield choice
 
-
+# Cancellation form
 class CancelbookingForm(FlaskForm):
     # def __init__(self,userId,**kw):
     #   super(CancelbookingForm, self).__init__(**kw)
@@ -165,7 +151,7 @@ class CancelbookingForm(FlaskForm):
     ids = SelectField('Choose meeting to cancel', coerce=int, choices=MeetingChoiceIterable())
     submit = SubmitField('Cancel')
 
-
+# availability forms
 class RoomavailableForm(FlaskForm):
     date = DateField('Choose date', format="%m/%d/%Y", validators=[DataRequired()])
     startTime = SelectField('Choose starting time(in 24hr expression)', coerce=int,
@@ -173,7 +159,6 @@ class RoomavailableForm(FlaskForm):
     duration = SelectField('Choose duration of the meeting(in hours)', coerce=int,
                            choices=[(i, i) for i in range(1, 6)])
     submit = SubmitField('Check')
-
 
 class RoomoccupationForm(FlaskForm):
     date = DateField('Choose date', format="%m/%d/%Y", validators=[DataRequired()])
@@ -193,13 +178,3 @@ class MeetingChoiceAllIterable(object):
 class MeetingparticipantsForm(FlaskForm):
     ids = SelectField('Choose meeting', coerce=int, choices=MeetingChoiceAllIterable())
     submit = SubmitField('Check')
-
-
-class CostaccruedForm(FlaskForm):
-    startdate = DateField('Choose start date', format="%m/%d/%Y", validators=[DataRequired()])
-    enddate = DateField('Choose end date', format="%m/%d/%Y", validators=[DataRequired()])
-    submit = SubmitField('Check')
-
-    def validate_enddate(self, enddate):
-        if enddate.data < self.startdate.data:
-            raise ValidationError('End Date must be after Start Date')

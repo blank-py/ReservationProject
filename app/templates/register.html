@@ -33,13 +33,6 @@
                 {% endfor %}
         </p>
         <p>
-                {{ form.position.label }}<br>
-                {{ form.position(size=32) }}<br>
-                {% for error in form.position.errors %}
-                <span style="color: red;">[{{ error }}]</span>
-                {% endfor %}
-        </p>
-        <p>
                 {{ form.teamId.label }}<br>
                 {{ form.teamId() }}<br>
                 {% for error in form.teamId.errors %}
