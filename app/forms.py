@@ -119,9 +119,9 @@ class BookmeetingForm(FlaskForm):
                             choices=[(i, i) for i in range(9, 19)])
     duration = SelectField('Choose duration of the meeting(in hours)', coerce=int,
                            choices=[(i, i) for i in range(1, 6)])
-    participants_user = SelectMultipleField('Choose participants from company', coerce=int,
-                                            choices=UserChoiceIterable(), option_widget=widgets.CheckboxInput(),
-                                            widget=widgets.ListWidget(prefix_label=False), validators=[DataRequired()])
+#    participants_user = SelectMultipleField('Choose participants from company', coerce=int,
+#                                            choices=UserChoiceIterable(), option_widget=widgets.CheckboxInput(),
+#                                            widget=widgets.ListWidget(prefix_label=False), validators=[DataRequired()])
     submit = SubmitField('Book')
 
     def validate_title(self, title):
