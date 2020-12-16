@@ -14,7 +14,7 @@ db.session.add(team)
 
 
 # add admin & users
-user=User(id=1,username='admin',fullname='admin',position='admin',teamId=1)
+user=User(id=1,username='admin',fullname='admin',teamId=1)
 user.set_password('admin')
 db.session.add(user)
 
@@ -33,18 +33,9 @@ db.session.add(room)
 meeting=Meeting(id=9,title='past meeting',teamId=4,roomId=2,bookerId=2,date=datetime(2020,12,15),startTime=10,endTime=14,duration=4)
 db.session.add(meeting)
 
-# add past meeting log
-bookinglog=BookingLog(id=9,teamId=4,teamName='Student',title='past meeting',date=datetime(2020,12,15))
-db.session.add(bookinglog)
-
 # add future meetings
 meeting=Meeting(id=15,title='future meeting1',teamId=3,roomId=2,bookerId=2,date=datetime(2020,12, 14),startTime=11,endTime=14,duration=3)
 db.session.add(meeting)
-
-# add future meeting log
-bookinglog=BookingLog(id=15,teamId=3,teamName='Teacher',title='future meeting1',date=datetime(2020,12,11))
-db.session.add(bookinglog)
-
 
 
 participants_user=Participants_user(id=1,meeting='future meeting1',userId=2)

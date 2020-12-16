@@ -202,10 +202,6 @@ def book():
         meeting=Meeting(title=form.title.data,teamId=team.id,roomId=room.id,bookerId=booker.id,date=form.date.data,startTime=form.startTime.data,endTime=endTime,duration=form.duration.data)
         db.session.add(meeting)
 
-        # Add booking log
-        log=BookingLog(title=form.title.data,teamId=team.id,teamName=team.teamName,date=form.date.data)
-        db.session.add(log)
-
         # Add participants records
         for participant in participants_user:
             participating=Participants_user(meeting=form.title.data,userId=participant)
@@ -235,8 +231,6 @@ def cancelbooking():
         for part in participants_user:
             db.session.delete(part)
         
-        bookinglog=BookingLog.query.filter_by(title=meeting.title).first()
-        db.session.delete(bookinglog)
         
         db.session.delete(meeting)
         db.session.commit()
