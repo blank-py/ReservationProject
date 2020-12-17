@@ -1,3 +1,6 @@
+# Author: Patrik Raussi, Jesse Malinen
+
+# import
 from flask import render_template, flash, redirect, request, url_for
 from werkzeug.urls import url_parse
 from app import app
@@ -196,15 +199,10 @@ def book():
         room=Room.query.filter_by(id=form.rooms.data).first()
         endTime=form.startTime.data+form.duration.data
 
-        participants_user=form.participants_user.data
 
         meeting=Meeting(title=form.title.data,teamId=team.id,roomId=room.id,bookerId=booker.id,date=form.date.data,startTime=form.startTime.data,endTime=endTime,duration=form.duration.data)
         db.session.add(meeting)
 
-        # Add participants records
-        for participant in participants_user:
-            participating=Participants_user(meeting=form.title.data,userId=participant)
-            db.session.add(participating)
 
         db.session.commit()
         flash('Booking success!')
