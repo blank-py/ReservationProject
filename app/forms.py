@@ -116,12 +116,9 @@ class BookmeetingForm(FlaskForm):
     rooms = SelectField('Choose room', coerce=int, choices=RoomChoiceIterable())
     date = DateField('Choose date', format="%m/%d/%Y", validators=[DataRequired()])
     startTime = SelectField('Choose starting time(in 24hr expression)', coerce=int,
-                            choices=[(i, i) for i in range(9, 19)])
+                            choices=[(i, i) for i in range(16, 21)])
     duration = SelectField('Choose duration of the meeting(in hours)', coerce=int,
-                           choices=[(i, i) for i in range(1, 6)])
-#    participants_user = SelectMultipleField('Choose participants from company', coerce=int,
-#                                            choices=UserChoiceIterable(), option_widget=widgets.CheckboxInput(),
-#                                            widget=widgets.ListWidget(prefix_label=False), validators=[DataRequired()])
+                           choices=[(i, i) for i in range(1, 5)])
     submit = SubmitField('Book')
 
     def validate_title(self, title):
@@ -155,9 +152,9 @@ class CancelbookingForm(FlaskForm):
 class RoomavailableForm(FlaskForm):
     date = DateField('Choose date', format="%m/%d/%Y", validators=[DataRequired()])
     startTime = SelectField('Choose starting time(in 24hr expression)', coerce=int,
-                            choices=[(i, i) for i in range(9, 19)])
+                            choices=[(i, i) for i in range(16, 21)])
     duration = SelectField('Choose duration of the meeting(in hours)', coerce=int,
-                           choices=[(i, i) for i in range(1, 6)])
+                           choices=[(i, i) for i in range(1, 5)])
     submit = SubmitField('Check')
 
 class RoomoccupationForm(FlaskForm):

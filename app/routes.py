@@ -73,7 +73,6 @@ def adduser():
     if form.validate_on_submit():
         user=User(username=form.username.data,\
                   fullname=form.fullname.data,\
-                  position=form.position.data,\
                   teamId=form.teamId.data)
         user.set_password(form.password.data)
         db.session.add(user)
